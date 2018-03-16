@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 
-mongoose.connect('mongodb:/localhost/test');
 
 const Movie = require('./models');
 
@@ -9,6 +8,24 @@ const { expect } = chai;
 const sinon = require('sinon');
 
 describe('Movies', () => {
+
+	before((done) => {
+		mongoose.connect('mongodb:/localhost/test');
+		const db = mongoose.connection;
+		db.on('error', () => console.error('connection error'));
+		db.once('open', () => {
+			console.log('database connected');
+		});
+		done();
+	});
+
+	after((done) => {
+		const db = mongoose.connection;
+		db.dropDatabase(() => {
+			mongoose.connection.close(done);
+		});
+		done();
+	});
 
 	describe('getMovieName', () => {
 		it('should return the name of the movie', () => {
